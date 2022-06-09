@@ -24,12 +24,6 @@ const validateDeleteMovie = celebrate({
   }),
 });
 
-const validateGetUser = celebrate({
-  params: Joi.object().keys({
-    _id: Joi.string().alphanum().length(24).hex(),
-  }),
-});
-
 const validateUpdateUser = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
@@ -55,7 +49,6 @@ const validateRegister = celebrate({
 module.exports = {
   validateCreateMovie,
   validateDeleteMovie,
-  validateGetUser,
   validateUpdateUser,
   validateLogin,
   validateRegister,
