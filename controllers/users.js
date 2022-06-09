@@ -5,6 +5,14 @@ const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
 const NotFoundError = require('../errors/NotFoundError');
 const { SECRET_KEY } = require('../utils/constants');
+const {
+  CREATE_USER_BAD_DATA,
+  UPDATE_USER_BAD_DATA,
+  REGISTER_DUPLICATE_EMAIL,
+  UPDATE_DUPLICATE_EMAIL,
+  USER_NOT_FOUND,
+  BAD_ID,
+} = require('../utils/messages');
 
 // const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -28,9 +36,9 @@ module.exports.createUser = (req, res, next) => {
     .catch((err) => {
       let prettyErr = err;
       if (err.name === 'ValidationError') {
-        prettyErr = new BadRequestError('Переданы некорректные данные при создании пользователя');
+        prettyErr = new BadRequestError(CREATE_USER_BAD_DATA);
       } else if (err.code === 11000) {
-        prettyErr = new ConflictError('При регистрации указан email, который уже существует на сервере');
+        prettyErr = new ConflictError(REGISTER_DUPLICATE_EMAIL);
       }
       next(prettyErr);
     });
@@ -42,7 +50,7 @@ module.exports.updateUserInfo = (req, res, next) => {
   User.findOneAndUpdate({ _id: userId }, { name, email }, { new: true, runValidators: true })
     .then((user) => {
       if (user === null) {
-        throw new NotFoundError(`Пользователь по указанному _id (${userId}) не найден`);
+        throw new NotFoundError(USER_NOT_FOUND);
       } else {
         res.send(user);
       }
@@ -50,7 +58,9 @@ module.exports.updateUserInfo = (req, res, next) => {
     .catch((err) => {
       let prettyErr = err;
       if (err.name === 'ValidationError') {
-        prettyErr = new BadRequestError('Переданы некорректные данные при обновлении пользователя');
+        prettyErr = new BadRequestError(UPDATE_USER_BAD_DATA);
+      } else if (err.code === 11000) {
+        prettyErr = new ConflictError(UPDATE_DUPLICATE_EMAIL);
       }
       next(prettyErr);
     });
@@ -77,7 +87,7 @@ module.exports.getUserInfo = (req, res, next) => {
   User.findById(_id)
     .then((user) => {
       if (user === null) {
-        throw new NotFoundError(`Пользователь по указанному _id (${_id}) не найден`);
+        throw new NotFoundError(USER_NOT_FOUND);
       } else {
         res.send(user);
       }
@@ -85,7 +95,7 @@ module.exports.getUserInfo = (req, res, next) => {
     .catch((err) => {
       let prettyErr = err;
       if (err.name === 'CastError') {
-        prettyErr = new BadRequestError('Передан некорректный формат id');
+        prettyErr = new BadRequestError(BAD_ID);
       }
       next(prettyErr);
     });

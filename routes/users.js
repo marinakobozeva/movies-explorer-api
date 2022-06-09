@@ -1,23 +1,12 @@
-/* eslint-disable no-useless-escape */
-
-const { celebrate, Joi } = require('celebrate');
 const usersRouter = require('express').Router();
+const { validateGetUser, validateUpdateUser } = require('../middlewares/validation');
 const {
   getUserInfo,
   updateUserInfo,
 } = require('../controllers/users');
 
-usersRouter.get('/me', celebrate({
-  params: Joi.object().keys({
-    _id: Joi.string().alphanum().length(24).hex(),
-  }),
-}), getUserInfo);
+usersRouter.get('/me', validateGetUser, getUserInfo);
 
-usersRouter.patch('/me', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    email: Joi.string().email(),
-  }),
-}), updateUserInfo);
+usersRouter.patch('/me', validateUpdateUser, updateUserInfo);
 
 module.exports = usersRouter;
